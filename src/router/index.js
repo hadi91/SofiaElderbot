@@ -1,22 +1,25 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Register from '../components/Register.vue'
+import Chatbot from '../components/Chatbot.vue'
+import firebase from 'firebase'
+// import store from '../store/index.js'
 
 Vue.use(VueRouter)
 
-  const routes = [
+const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: Home
+    path: '/register',
+    name: 'Register',
+    component: Register
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/',
+    name: 'Chatbot',
+    component: Chatbot,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 
@@ -25,5 +28,20 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+
+router.beforeEach((to,from, next) => {
+  // const currentUser = firebase.auth().currentUser;
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  // const loggedIn = store.getters.user.loggedIn;
+  const loggedIn = firebase.auth().currentUser;
+  console.log('store', loggedIn);
+  console.log('auth', requiresAuth);
+  if (requiresAuth && !loggedIn){
+    next('/register');
+  } else {
+    next();
+  }
+});
 
 export default router
